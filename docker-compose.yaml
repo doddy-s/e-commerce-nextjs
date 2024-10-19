@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    image: kaliman-fe-image
+    container_name: kaliman-fe-container
+    ports:
+      - "3000:3000"
