@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -e
+
+            mkdir -p production
+
+            cd production
+
+            if [ ! -d "${{ secrets.REPO_NAME }}" ]; then
+              git clone https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/${{ secrets.REPO_OWNER }}/${{ secrets.REPO_NAME }}.git
+            fi
+
+            cd ${{ secrets.REPO_NAME }}
+
+            git pull origin main
+
+            docker compose up --build -d
+
+            docker image prune -f
